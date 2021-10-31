@@ -128,7 +128,7 @@ class KDTree:
         if depth % 2 == 0:
             if node.bottom_left is not None and node.top_right is not None:
                 # print("ok ==0")
-                plt.plot([node.point.x, node.point.x], [node.bottom_left.y, node.top_right.y], 'b')
+                plt.plot([node.point.x, node.point.x], [node.bottom_left.y, node.top_right.y], 'g')
                 plt.scatter(node.point.x, node.point.y, color="red")
                 # plt.show()
 
@@ -151,3 +151,20 @@ class KDTree:
             points.append(Point(randint(0, top_x), randint(0, top_y)))
         self.build(points)
         self.prepare_to_plot(Point(0, 0), Point(top_x, top_y))
+
+
+
+
+# main control
+
+def main():
+    # build the tree
+    tree = KDTree()
+    n = int(input("Numero de puntos: "))
+    top_x = int(input("Top x: "))
+    top_y = int(input("Top y: "))
+    tree.populate(n, top_x, top_y)
+    # tree.print_tree()
+    tree.draw()
+
+main()
