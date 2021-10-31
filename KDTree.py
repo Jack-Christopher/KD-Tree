@@ -1,11 +1,16 @@
 # Python implementation of the KD Tree
+# Para su uso es necesario instalar la librería matplotlib
 import matplotlib.pyplot as plt
+from heapq import heappush, heappop
 from random import randint
 
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+    
+    def distance(self, other):
+        return ((self.x - other.x)**2 + (self.y - other.y)**2)**0.5
 
 
 class Node:
@@ -110,26 +115,32 @@ class KDTree:
         self.print_tree_rec(node.right, depth + 1)
     
 
-    def draw(self):
-        self.draw_rec(self.root, 0)#, x_values, y_values)
-        # plt.plot(x_values, y_values, 'ro')
+    def draw(self, point= None, list_points = None):
+        self.draw_rec(self.root, 0, list_points)
+        
         #draw exterior mark
         plt.plot([0, self.root.top_right.x], [0, 0], 'k-')
         plt.plot([0, 0], [0, self.root.top_right.y], 'k-')
         plt.plot([self.root.top_right.x, self.root.top_right.x], [0, self.root.top_right.y], 'k-')
         plt.plot([0, self.root.top_right.x], [self.root.top_right.y, self.root.top_right.y], 'k-')
+        if point is not None:
+            plt.scatter(point.x, point.y, color="black")
         
         plt.show()
     
-    def draw_rec(self, node, depth):#, x_values, y_values):
+    def draw_rec(self, node, depth, list_points = None):
         if node is None:
-            return
+            return            
+            
         # corte vertical
         if depth % 2 == 0:
             if node.bottom_left is not None and node.top_right is not None:
                 # print("ok ==0")
                 plt.plot([node.point.x, node.point.x], [node.bottom_left.y, node.top_right.y], 'g')
-                plt.scatter(node.point.x, node.point.y, color="red")
+                if list_points is not None and node.point in list_points:
+                    plt.scatter(node.point.x, node.point.y, color="yellow")
+                else:
+                    plt.scatter(node.point.x, node.point.y, color="red")
                 # plt.show()
 
         # corte horizontal
@@ -137,11 +148,15 @@ class KDTree:
             if node.bottom_left is not None and node.top_right is not None:
                 # print("ok ==1")
                 plt.plot([node.bottom_left.x, node.top_right.x], [node.point.y, node.point.y], 'b')
-                plt.scatter(node.point.x, node.point.y, color="red")
+                if list_points is not None and node.point in list_points:
+                    plt.scatter(node.point.x, node.point.y, color="yellow")
+                else:
+                    plt.scatter(node.point.x, node.point.y, color="red")
                 # plt.show()
 
-        self.draw_rec(node.left, depth + 1)#, x_values, y_values)
-        self.draw_rec(node.right, depth + 1)#, x_values, y_values)
+        self.draw_rec(node.left, depth + 1, list_points)
+        self.draw_rec(node.right, depth + 1, list_points)
+
 
     def populate(self, n: int, top_x: int, top_y: int):
         # add random points and the build the tree
@@ -151,6 +166,29 @@ class KDTree:
             points.append(Point(randint(0, top_x), randint(0, top_y)))
         self.build(points)
         self.prepare_to_plot(Point(0, 0), Point(top_x, top_y))
+    
+    def KNN(self, point: Point, k: int):
+        heap = []  # [ (int distance, Point point), ... ]
+        self.KNN_rec(self.root, point, heap, k)
+        result = []
+        for i in range(k+1):
+            result.append(heappop(heap)[1])
+
+        # print("type: ", type(result[0]))
+
+        return result[1:]
+    
+    def KNN_rec(self, node: Node, point: Point, heap: list, k: int):
+        if node is None:
+            return
+        heappush(heap, [node.point.distance(point), node.point])
+        if node.left is not None:
+            self.KNN_rec(node.left, point, heap, k)
+        if node.right is not None:
+            self.KNN_rec(node.right, point, heap, k)
+
+    
+
 
 
 
@@ -166,5 +204,13 @@ def main():
     tree.populate(n, top_x, top_y)
     # tree.print_tree()
     tree.draw()
+    print("\nKNN")
+    x = int(input("X: "))
+    y = int(input("Y: "))
+    k = int(input("K: "))
+    result = tree.KNN(Point(x, y), k)
+    print([ "(" + str(p.x) + ", " + str(p.y) + ")" for p in result ])
+
+    tree.draw(Point(x, y), result)
 
 main()
