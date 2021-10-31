@@ -117,6 +117,21 @@ class KDTree:
     def draw_rec(self, node, depth):#, x_values, y_values):
         if node is None:
             return
+        # corte vertical
         if depth % 2 == 0:
-            plt.plot([node.point.x, node.top_right.x], [node.point.y, node.top_right.y], 'b')
-            
+            if node.bottom_left is not None and node.top_right is not None:
+                # print("ok ==0")
+                plt.plot([node.point.x, node.point.x], [node.bottom_left.y, node.top_right.y], 'b')
+                plt.scatter(node.point.x, node.point.y, color="red")
+                # plt.show()
+
+        # corte horizontal
+        else:
+            if node.bottom_left is not None and node.top_right is not None:
+                # print("ok ==1")
+                plt.plot([node.bottom_left.x, node.top_right.x], [node.point.y, node.point.y], 'b')
+                plt.scatter(node.point.x, node.point.y, color="red")
+                # plt.show()
+
+        self.draw_rec(node.left, depth + 1)#, x_values, y_values)
+        self.draw_rec(node.right, depth + 1)#, x_values, y_values)
