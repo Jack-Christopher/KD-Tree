@@ -1,5 +1,6 @@
 # Python implementation of the KD Tree
 import matplotlib.pyplot as plt
+from random import randint
 
 class Point:
     def __init__(self, x, y):
@@ -40,13 +41,13 @@ class KDTree:
 
     def build(self, points: list):
         print("Building tree...")
-        print("Points: ", [str(p.x) + "," + str(p.y) for p in points])
+        # print("Points: ", [str(p.x) + "," + str(p.y) for p in points])
         self.root = self.build_tree(points, 0)
         # self.root.setLeft(None)
         # self.root.setRight(None)
     
     def build_tree(self, points, depth):
-        print("Points: ", [str(p.x) + "," + str(p.y) for p in points])
+        # print("Points: ", [str(p.x) + "," + str(p.y) for p in points])
         if len(points) == 0:
             return None
         # si solo queda un elemento, ese es el nodo hoja
@@ -112,6 +113,12 @@ class KDTree:
     def draw(self):
         self.draw_rec(self.root, 0)#, x_values, y_values)
         # plt.plot(x_values, y_values, 'ro')
+        #draw exterior mark
+        plt.plot([0, self.root.top_right.x], [0, 0], 'k-')
+        plt.plot([0, 0], [0, self.root.top_right.y], 'k-')
+        plt.plot([self.root.top_right.x, self.root.top_right.x], [0, self.root.top_right.y], 'k-')
+        plt.plot([0, self.root.top_right.x], [self.root.top_right.y, self.root.top_right.y], 'k-')
+        
         plt.show()
     
     def draw_rec(self, node, depth):#, x_values, y_values):
@@ -135,3 +142,12 @@ class KDTree:
 
         self.draw_rec(node.left, depth + 1)#, x_values, y_values)
         self.draw_rec(node.right, depth + 1)#, x_values, y_values)
+
+    def populate(self, n: int, top_x: int, top_y: int):
+        # add random points and the build the tree
+        points = []
+        
+        for i in range(n):
+            points.append(Point(randint(0, top_x), randint(0, top_y)))
+        self.build(points)
+        self.prepare_to_plot(Point(0, 0), Point(top_x, top_y))
